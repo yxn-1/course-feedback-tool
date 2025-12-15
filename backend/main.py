@@ -72,9 +72,19 @@ def assign_instructor(course_id: int, instructor_id: int, db: Session = Depends(
     db.refresh(course)
     return course
 
+
 @app.get("/feedbacks")
-def read_feedbacks(db: Session = Depends(get_db)):
-    return db.query(Feedback).all()
+def get_feedbacks(db: Session = Depends(get_db)):
+    feedbacks = db.query(Feedback).all()
+    result = []
+    for f in feedbacks:
+        result.append({
+            "student": f.user.name if f.user else None,                  # Student name
+            "course": f.course.title if f.course else "Course not found",                # Course title
+            "professor": f.course.instructor.name if f.course and f.course.instructor else "Instructor not found",  # Instructor name
+            "content": f.content                     # Feedback text
+        })
+    return result
 
 @app.post("/feedbacks")
 def create_feedback(user_id: int, course_id: int, content: str, db: Session = Depends(get_db)):
