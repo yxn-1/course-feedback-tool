@@ -33,6 +33,12 @@ courses = [
 db.add_all(courses)
 db.commit()
 
+# Assign Dr. Smith to CPSC 110
+course = db.query(Course).filter_by(title="CPSC 110").first()
+instructor = db.query(User).filter_by(name="Dr. Smith").first()
+course.instructor = instructor
+db.commit()
+
 # --- Enrollments ---
 enrollments = [
     Enrollment(user_id=students[0].id, course_id=courses[0].id),

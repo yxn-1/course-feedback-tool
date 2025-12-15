@@ -31,12 +31,26 @@ def read_courses(db: Session = Depends(get_db)):
     return db.query(Course).all()
 
 @app.post("/courses")
-def create_course(title: str, db: Session = Depends(get_db)):
-    course = Course(title=title)
+def create_course(title: str, instructor_id: int, db: Session = Depends(get_db)):
+    instructor = db.query(User).filter_by(id=instructor_id, role="instructor").first()
+    if not instructor:
+        raise HTTPException(status_code=404, detail="Instructor not found")
+    course = Course(title=title, instructor_id=instructor.id)
     db.add(course)
     db.commit()
     db.refresh(course)
     return course
+
+@app.get("/courses_with_instructors")
+def get_courses(db: Session = Depends(get_db)):
+    courses = db.query(Course).all()
+    result = []
+    for c in courses:
+        result.append({
+            "course": c.title,
+            "instructor": c.instructor.name if c.instructor else None
+        })
+    return result
 
 @app.get("/feedbacks")
 def read_feedbacks(db: Session = Depends(get_db)):
