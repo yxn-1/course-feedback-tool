@@ -12,6 +12,7 @@ class User(Base):
     role = Column(String)  # "student" or "instructor"
     enrollments = relationship("Enrollment", back_populates="user")
     feedbacks = relationship("Feedback", back_populates="user")
+    courses_taught = relationship("Course", back_populates="instructor")
 
 class Course(Base):
     __tablename__ = "courses"
@@ -19,6 +20,7 @@ class Course(Base):
     title = Column(String)
     enrollments = relationship("Enrollment", back_populates="course")
     feedbacks = relationship("Feedback", back_populates="course")
+    instructor = relationship("User", back_populates="courses_taught")
 
 class Enrollment(Base):
     __tablename__ = "enrollments"
