@@ -33,8 +33,13 @@ def read_courses(db: Session = Depends(get_db)):
 @app.post("/courses")
 def create_course(title: str, instructor_id: int, db: Session = Depends(get_db)):
     instructor = db.query(User).filter_by(id=instructor_id, role="instructor").first()
+
+    # Enforce only instructors can be assigned
     if not instructor:
         raise HTTPException(status_code=404, detail="Instructor not found")
+    if instructor.role != "instructor":
+        raise HTTPException(status_code=400, detail=f"User {instructor.name} is not an instructor")
+    
     course = Course(title=title, instructor_id=instructor.id)
     db.add(course)
     db.commit()
@@ -51,6 +56,21 @@ def get_courses(db: Session = Depends(get_db)):
             "instructor": c.instructor.name if c.instructor else None
         })
     return result
+
+@app.put("/courses/{course_id}/assign_instructor")
+def assign_instructor(course_id: int, instructor_id: int, db: Session = Depends(get_db)):
+    course = db.query(Course).get(course_id)
+    instructor = db.query(User).get(instructor_id)
+
+    if not course or not instructor:
+        raise HTTPException(status_code=404, detail="Course or instructor not found")
+    if instructor.role != "instructor":
+        raise HTTPException(status_code=400, detail="Only instructors can be assigned")
+    
+    course.instructor = instructor
+    db.commit()
+    db.refresh(course)
+    return course
 
 @app.get("/feedbacks")
 def read_feedbacks(db: Session = Depends(get_db)):
