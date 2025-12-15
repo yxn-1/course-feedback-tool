@@ -12,15 +12,16 @@ class User(Base):
     role = Column(String)  # "student" or "instructor"
     enrollments = relationship("Enrollment", back_populates="user")
     feedbacks = relationship("Feedback", back_populates="user")
-    courses_taught = relationship("Course", back_populates="instructor")
+    courses_taught = relationship("Course", back_populates="instructor", foreign_keys="Course.instructor_id")
 
 class Course(Base):
     __tablename__ = "courses"
     id = Column(Integer, primary_key=True)
     title = Column(String)
+    instructor_id = Column(Integer, ForeignKey("users.id"))
     enrollments = relationship("Enrollment", back_populates="course")
     feedbacks = relationship("Feedback", back_populates="course")
-    instructor = relationship("User", back_populates="courses_taught")
+    instructor = relationship("User", back_populates="courses_taught", foreign_keys=[instructor_id])
 
 class Enrollment(Base):
     __tablename__ = "enrollments"
