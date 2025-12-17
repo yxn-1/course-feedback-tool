@@ -41,6 +41,9 @@ class Feedback(Base):
     course = relationship("Course", back_populates="feedbacks")
 
 # SQLite setup
-engine = create_engine("sqlite:///course_feedback.db")
+DATABASE_URL = "sqlite:///./course_feedback.db"
+
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 Base.metadata.create_all(engine)
-SessionLocal = sessionmaker(bind=engine)
